@@ -8,8 +8,8 @@
 {% block content %}{% endblock %}
 <div class="records"></div>
 <script>
-    const socket = new WebSocket('ws://localhost:8000/action/accessrecord/');
-
+    const socket = new WebSocket('ws://localhost:8000/action/accessrecord/{{ id }}');
+    console.log(id)
     socket.onopen = function (event) {
         console.log('WebSocket connection opened');
         // 连接打开后，开始定时发送请求

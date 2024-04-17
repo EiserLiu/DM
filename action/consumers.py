@@ -65,14 +65,15 @@ class ActionConsumer(WebsocketConsumer):
 
     def get_data(self):
         # 如果是第一次查询，获取过去两秒钟内的记录
+        building_id = self.scope['url_route']['kwargs']['building_id']
         if self.last_query_time is None:
 
             two_seconds_ago = timezone.now() + timedelta(hours=8) - timezone.timedelta(seconds=self.interval)
             self.last_query_time = timezone.now() + timedelta(hours=8)  # 更新上次查询时间点
-            acc_obj = AccessRecord.objects.filter(createdat__gt=two_seconds_ago)
+            acc_obj = AccessRecord.objects.filter(createdat__gt=two_seconds_ago, buildingid=building_id)
         else:
             # 否则，获取自上次查询以来新创建的记录
-            acc_obj = AccessRecord.objects.filter(createdat__gt=self.last_query_time)
+            acc_obj = AccessRecord.objects.filter(createdat__gt=self.last_query_time, buildingid=building_id)
             self.last_query_time = timezone.now() + timedelta(hours=8)  # 更新上次查询时间点
 
         print(acc_obj.values('createdat'))
