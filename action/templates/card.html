@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% for record in records %}
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-title">{{ record.user }}</p>
+                            <p class="card-text">{{ record.status }}</p>
+                            <p class="card-text">{{ record.building }}</p>
+                            <p class="card-text">{{ record.createdat }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
