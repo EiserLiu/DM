@@ -19,8 +19,7 @@ from .serializers import AbnormalSerializer, AccessRecordSerializer
 class AccessRecordView(APIView):
 
     def get(self, request, *args, **kwargs):
-        id = kwargs.get('id')
-        print(id)
+        id = kwargs.get('buildingid')
         records = []
         actions = AccessRecord.objects.filter(buildingid=id)
         for action in actions:
