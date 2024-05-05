@@ -5,14 +5,12 @@
     <title>Title</title>
 </head>
 <body>
-{% block content %}{% endblock %}
 <div class="records"></div>
+{% block content %}{% endblock %}
 <script>
     const socket = new WebSocket('ws://localhost:8000/action/accessrecord/{{ buildingid }}/');
     socket.onopen = function (event) {
         console.log('WebSocket connection opened');
-        // 连接打开后，开始定时发送请求
-        startInterval();
     };
 
     socket.onmessage = function (event) {
@@ -21,15 +19,11 @@
         records.forEach(record => {
             const recordElement = document.createElement('div');
             recordElement.classList.add('record');
-            console.log(record.user)
-            console.log(record.building)
-            console.log(record.createdat)
-            console.log(record.status)
             recordElement.innerHTML = `
             <p>${record.user}</p>
+            <p>${record.status}</p>
             <p>${record.building}</p>
             <p>${record.createdat}</p>
-            <p>${record.status}</p>
         `;
             recordsElement.appendChild(recordElement);
         });
@@ -43,12 +37,6 @@
         console.error('WebSocket error:', error);
     };
 
-    // 定时发送请求的函数
-    function startInterval() {
-        const intervalId = setInterval(function () {
-            socket.send(JSON.stringify({action: 'get_data'}));
-        }, 2000); // 每2000毫秒发送一次请求
-    }
 
 </script>
 </body>

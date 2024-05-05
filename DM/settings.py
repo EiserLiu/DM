@@ -58,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'action.middleware.ip_filter_middleware.FilterIPMiddleware',
 ]
 
 ROOT_URLCONF = "DM.urls"
@@ -92,7 +93,7 @@ DATABASES = {
         "PASSWORD": "123456",
         "PORT": 3306,
         "HOST": "localhost"
-    }
+    },
 }
 
 # Password validation
