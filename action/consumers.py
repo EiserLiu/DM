@@ -60,6 +60,7 @@ class ActionConsumer(WebsocketConsumer):
                 # 获取数据并发送给前端
                 records = self.get_records()
                 self.send_records(records)
+                print(records)
                 print(f"定时器事件：成功")
             except Exception as e:
                 print(f"定时器事件：发生了一个错误：{e}")

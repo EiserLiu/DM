@@ -60,6 +60,9 @@ class Buildings(models.Model):
     updatedat = models.DateTimeField(db_column='updatedAt')  # Field name made lowercase.
     deletedat = models.DateTimeField(db_column='deletedAt', blank=True, null=True)  # Field name made lowercase.
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         managed = False
         db_table = 'buildings'
@@ -217,9 +220,12 @@ class Users(models.Model):
                                   null=True)  # Field name made lowercase.
     majorid = models.ForeignKey(Majors, models.DO_NOTHING, db_column='majorId', blank=True,
                                 null=True)  # Field name made lowercase.
+    image = models.ImageField(verbose_name='用户照片', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
-        managed = False
         db_table = 'users'
         unique_together = (('id', 'account'),)
 
