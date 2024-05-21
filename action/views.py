@@ -1,4 +1,7 @@
-from django.http import HttpResponse
+import os
+
+from DM.settings import MEDIA_ROOT
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.renderers import TemplateHTMLRenderer
@@ -23,7 +26,6 @@ class AccessRecordAddView(GenericViewSet):
     def post(self, request):
         status = request.data.get('status')
         serializer = self.get_serializer(data=request.data)
-        # print(userId, buildingId, status)
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -42,3 +44,11 @@ class AccessRecordView(GenericViewSet):
     def get(self, request, *args, **kwargs):
         building_id = kwargs["buildingid"]
         return Response({'code': 201, 'bid': building_id})
+
+
+class FileView(APIView):
+    def get(self, request, name):
+        path = MEDIA_ROOT / name
+        if os.path.isfile(path):
+            return FileResponse(open(path, 'rb'))
+        return Response({'error': '文件不存在'}, status=status.HTTP_404_NOT_FOUND)
