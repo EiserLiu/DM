@@ -1,15 +1,15 @@
+import datetime
 import os
 
-from DM.settings import MEDIA_ROOT
-from django.http import HttpResponse, FileResponse
-from django.shortcuts import render
+from django.http import FileResponse
 from rest_framework import status
-from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet, mixins, GenericViewSet, ModelViewSet
+from rest_framework.viewsets import mixins, GenericViewSet
 
-from old.models import Users, Buildings, Admins
+from DM.settings import MEDIA_ROOT
+from old.models import Users, Evaluates
+from old.serializers import EvaluatesSerializer
 from .models import Abnormal, AccessRecord
 from .serializers import AbnormalSerializer, AccessRecordSerializer
 
@@ -24,7 +24,6 @@ class AccessRecordAddView(GenericViewSet):
     queryset = AccessRecord.objects.all()
 
     def post(self, request):
-        status = request.data.get('status')
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -43,7 +42,48 @@ class AccessRecordView(GenericViewSet):
 
     def get(self, request, *args, **kwargs):
         building_id = kwargs["buildingid"]
-        return Response({'code': 201, 'bid': building_id})
+        today_in = self.get_queryset().filter(buildingid=building_id, status=0,
+                                              createdat__gt=datetime.date.today()).count()
+        today_out = self.get_queryset().filter(buildingid=building_id, status=1,
+                                               createdat__gt=datetime.date.today()).count()
+        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=3)
+
+        # 获取过去三天内有进入记录的所有独立个体（例如用户ID）
+        active_individuals_in = self.get_queryset().filter(
+            buildingid=building_id,
+            status=0,  # 假设 status=0 表示进入
+            createdat__gt=cutoff_date
+        ).values_list('userid', flat=True).distinct()
+
+        # 获取过去三天内有离开记录的所有独立个体（例如用户ID）
+        active_individuals_out = self.get_queryset().filter(
+            buildingid=building_id,
+            status=1,  # 假设 status=1 表示离开
+            createdat__gt=cutoff_date
+        ).values_list('userid', flat=True).distinct()
+
+        # 获取所有个体的总数
+        All_User = Users.objects.filter(roomid__buildingid=building_id).count()
+
+        # 计算在过去三天内没有进入记录的人数
+        inactive_individuals_in = All_User - active_individuals_in.count()
+
+        # 计算在过去三天内没有离开记录的人数
+        inactive_individuals_out = All_User - active_individuals_out.count()
+
+        # 宿舍评分
+        rating = Evaluates.objects.filter(roomid__buildingid=building_id, createdat__gt=datetime.date.today())
+        ratingser = EvaluatesSerializer(instance=rating, many=True)
+        print(rating)
+        return Response({
+            'code': 200,  # 通常 GET 请求成功时使用 200 状态码
+            'bid': building_id,
+            # 'in': today_in,
+            # 'out': today_out,
+            'long_time_no_in': inactive_individuals_in,
+            'long_time_no_out': inactive_individuals_out,
+            'rating': ratingser.data
+        })
 
 
 class FileView(APIView):
